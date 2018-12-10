@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+	
+</body>
+<script>
+	const data = {
+		price: 100,	
+		discount: .8	//折扣
+	}
+
+	const customer1 = {
+		name: "customer_1",
+		VIP: true,
+		quantity: 20,	//购买数量 
+		total: 0,		//总消费
+		timeStamp: 0	//时间戳
+	}
+
+	const customer2 = {
+		name: "customer_2",
+		VIP: false,
+		quantity: 8,	//购买数量 
+		total: 0,		//总消费
+		timeStamp: 0	//时间戳
+	}
+
+	total = (info) => {
+		if (info.VIP) {
+			info.total = data.price * info.quantity * data.discount
+		} else {
+			info.total = data.price * info.quantity
+		}
+	}
+
+	purcharseTime = (info) => {
+		info.timeStamp = Date.now()
+	}
+
+	class Dep {
+		constructor() {
+			this.subs = []
+		}
+		addSubs (sub) {
+			this.subs.push(sub)
+		}
+		notify (val) {
+			this.subs.forEach( sub => {
+				sub.update()
+			})
+		}
+	}
+	Dep.target = null
+	class Watcher{
+		constructor(customer, funcList) {
+			this.funcList = funcList;
+			this.customer = customer;
+
+			Dep.target = this
+			//依赖收集
+			this.price = data.price
+			this.data = data.discount
+			Dep.target = null
+		}
+		update () {
+			this.funcList.forEach( func => func(this.customer))
+			console.log(this.customer.name + " 消费 " +this.customer.total)
+			
+		}
+	}
+
+	function defineReactive (data, watcherList, funcList) {
+
+		Object.keys(data).forEach( key => {
+			let dep = new Dep()
+
+			let value = data[key]
+			Object.defineProperty(data, key, {
+				get () {
+					if (dep.subs.indexOf(Dep.target) === -1) {
+						dep.addSubs(Dep.target)
+					}
+					return value
+				},
+				set (newValue) {
+					value = newValue
+					dep.notify()
+				}
+			})
+		})
+
+		watcherList.forEach( watcher => {
+			new Watcher(watcher, funcList)
+		})
+	}
+
+	defineReactive(data, [customer1, customer2], [total, purcharseTime])
+
+	data.price = 200
+
+</script>
+</html>

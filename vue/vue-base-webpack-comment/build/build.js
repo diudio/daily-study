@@ -1,4 +1,8 @@
 'use strict'
+/*
+  build 打包文件过程
+  
+*/
 require('./check-versions')()
 
 process.env.NODE_ENV = 'production'
@@ -14,8 +18,10 @@ const webpackConfig = require('./webpack.prod.conf')
 const spinner = ora('building for production...')
 spinner.start()
 
+//删除原来的
 rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
   if (err) throw err
+  //重新打包
   webpack(webpackConfig, (err, stats) => {
     spinner.stop()
     if (err) throw err
